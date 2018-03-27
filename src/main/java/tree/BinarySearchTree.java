@@ -1,32 +1,47 @@
 package tree;
 
+import tree.implementations.InOrder;
+
+import java.util.Iterator;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class BinarySearchTree <T extends Comparable<T>> {
+public class BinarySearchTree <T extends Comparable<T>> implements TreeSearch<T> {
 
     private BinarySearchTree<T> left;
     private BinarySearchTree<T> right;
+
     private T value;
+    private TreeTraversal traversal;
 
     public BinarySearchTree(T value) {
-        checkNotNull(value, "Value shouldn't be null.");
-        this.value = value;
+        this(value, new InOrder());
     }
-    public void insert (T value){
+
+    public BinarySearchTree(T value, TreeTraversal traversal) {
         checkNotNull(value, "Value shouldn't be null");
+        checkNotNull(traversal, "Traversal cannot be null");
+        this.value = value;
+        this.traversal = traversal;
+    }
+
+    public void insert (T value){
+
         if (this.value==value){
             throw new IllegalArgumentException("This value already exists.");
         }
-        else if (value.compareTo(this.value) < 0){
+        if (value.compareTo(this.value) < 0){
             if (left == null){
-                left = new BinarySearchTree<>(value);
+                left = new BinarySearchTree<>(value, traversal);
+            }else {
+                left.insert(value);
             }
-        }
-        else if (value.compareTo(this.value) > 0){
+        }else {
             if (right == null){
-                right = new BinarySearchTree<>(value);
+                right = new BinarySearchTree<>(value, traversal);
+            } else {
+              right.insert(value);
             }
         }
     }
@@ -57,5 +72,10 @@ public class BinarySearchTree <T extends Comparable<T>> {
 
     public T getValue() {
         return value;
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        return traversal.traverse(this).iterator();
     }
 }
